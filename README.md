@@ -5,7 +5,8 @@ This program is for an Arduino Leonardo, and allows for the control of a joystic
 
 ## Keys are as follows:
 
-```up: w (pin 12)
+```bash
+up: w (pin 12)
 down: s (pin 11)
 left: a (pin 10)
 right: d (pin 9)

@@ -49,7 +49,6 @@ Bounce dbBLUE = Bounce();
 Bounce dbGREEN = Bounce();
 Bounce dbYELLOW = Bounce();
 
-
 int counter = 0;   // button push counter
 
 int state = 0xff;
@@ -67,7 +66,7 @@ char keys[] = {
 void setup() {
   Serial.begin(115200);
 
-  pinMode(SAFETY, INPUT_PULLUP); // safety switch, ground to play
+  pinMode(SAFETY, INPUT_PULLUP); // safety switch: ground to play
 
   //start LED off
   pinMode(LED, OUTPUT);
@@ -91,12 +90,13 @@ void setupButton(Bounce &b, int pin) {
 
 void loop() {
 
-  // saftey routine, board must be reset to pull out of this
+  // safety switch: entered if pin 4 is disconnected from ground, for fixing runaway bugs
   while(digitalRead(SAFETY)) {
     Keyboard.releaseAll();
     Keyboard.end();
+    digitalWrite(LED, HIGH );
     while(true){
-      digitalWrite(LED, HIGH );
+      // stop program here
     }
   }
 
@@ -105,7 +105,7 @@ void loop() {
 
   for (int i=0; i<INPUTS; i++) {
     pos = B10000000 >> i;
-    // Update the debouncer
+
     buttons[i].update();
     if (!buttons[i].read()) {
       state = state ^ pos;

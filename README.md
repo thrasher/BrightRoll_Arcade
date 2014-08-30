@@ -1,7 +1,11 @@
 BrightRoll Palo Alto Arcade
 =========
 
-This program is for an Arduino Leonardo, and allows for the control of a joystick and arcade buttons at BrightRoll's Palo Alto front door.  Key presses are are held, without repeating, until a release signal is sent (just as a real keyboard would do, when you hold a key down).
+This program is for an [Arduino Leonardo](http://arduino.cc/en/Main/arduinoBoardLeonardo), and allows for the control of a joystick and arcade buttons at BrightRoll's Palo Alto front door.  Key presses are are held, without repeating, until a release signal is sent (just as a real keyboard would do, when you hold a key down).
+
+![Example joystick with switches](http://www.jammaboards.com/store/images/detailed/0/Super_joystick.jpg)
+
+![Example buttons](http://www.ultimarc.com/images/goldleaf.jpg)
 
 ## Keys are as follows:
 

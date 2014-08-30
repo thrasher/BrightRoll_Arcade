@@ -32,5 +32,3 @@ If a long wire is used to connect to the Arcade, noise may cause false character
 * ChrisD
 * Wing
 * Jason
-
-* HAX Ambassadors

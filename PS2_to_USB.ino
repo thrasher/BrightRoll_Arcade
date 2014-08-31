@@ -1,95 +1,107 @@
 /*
-Requires PS2Keyboard v2.4 (for Leonardo) found here:
-http://www.pjrc.com/teensy/arduino_libraries/PS2Keyboard.zip
+ PS2 to USB keyboard translation.
+ 
+ This allows for reading a KeyWiz40-ST module, and sending the signals to a computer via an Arduino Leonardo's USB.
+ 
+ KeyWiz40-ST info can be found here:
+ http://groovygamegear.com/webstore/index.php?main_page=product_info&cPath=76_80&products_id=303
+ 
+ Leonardo keyboard modifier keys found here:
+ http://arduino.cc/en/Reference/KeyboardModifiers
+ 
+ Emulated Keyboard key = X-Wiz ST terminal
+ UP-Arrow    = U
+ DOWN-Arrow  = D
+ LEFT-Arrow  = L
+ RIGHT-Arrow = R
+ 2 = L
+ 1 = K
+ ENTER = N
+ 
+ Arduino Leonardo:
+ Pin3 = PS2 female pin5 +CLK
+ Pin4 = PS2 female pin1 +DATA
+ 5V  =  PS2 female pin4 Vcc 5v
+ GND =  PS2 female pin3 GND
+ 
+ Requires PS2Keyboard v2.4 (for Leonardo) found here:
+ http://www.pjrc.com/teensy/arduino_libraries/PS2Keyboard.zip
+ Based on the PS2Keyboard library example
+ 
+ Valid irq pins:
+ Arduino Leonardo: 3, 2, 0 (RX), 1 (TX)
+ 
+ for more information you can read the original wiki in arduino.cc
+ at http://www.arduino.cc/playground/Main/PS2Keyboard
+ or http://www.pjrc.com/teensy/td_libs_PS2Keyboard.html
+ 
+ Jason Thrasher 8-30-2014
+ */
 
-
-  PS2Keyboard library example
-  
-  PS2Keyboard now requries both pins specified for begin()
-
-  keyboard.begin(data_pin, irq_pin);
-  
-  Valid irq pins:
-     Arduino Uno:  2, 3
-     Arduino Due:  All pins, except 13 (LED)
-     Arduino Mega: 2, 3, 18, 19, 20, 21
-     Teensy 2.0:   All pins, except 13 (LED)
-     Teensy 2.0:   5, 6, 7, 8
-     Teensy 1.0:   0, 1, 2, 3, 4, 6, 7, 16
-     Teensy++ 2.0: 0, 1, 2, 3, 18, 19, 36, 37
-     Teensy++ 1.0: 0, 1, 2, 3, 18, 19, 36, 37
-     Sanguino:     2, 10, 11
-  
-  for more information you can read the original wiki in arduino.cc
-  at http://www.arduino.cc/playground/Main/PS2Keyboard
-  or http://www.pjrc.com/teensy/td_libs_PS2Keyboard.html
-  
-  Like the Original library and example this is under LGPL license.
-  
-  Modified by Cuninganreset@gmail.com on 2010-03-22
-  Modified by Paul Stoffregen <paul@pjrc.com> June 2010
-  
-  Emulated Keyboard key = X-Wiz ST terminal
-  UP-Arrow    = U
-  DOWN-Arrow  = D
-  LEFT-Arrow  = L
-  RIGHT-Arrow = R
-  2 = L
-  1 = K
-  ENTER = N
-  
-  Arduino Leonardo:
-  Pin3 = PS2 female pin5 +CLK
-  Pin4 = PS2 female pin1 +DATA
-  5V  =  PS2 female pin4 Vcc 5v
-  GND =  PS2 female pin3 GND
-*/
-   
 #include <PS2Keyboard.h>
 
-const int DataPin = 4;//8
-const int IRQpin =  3;//5
+#define LED     13 // indicates if we're broadcasting USB characters (flashes on up and down)
+#define SAFETY  8  // safety pin, pull to ground to play
+
+const int DATA_PIN = 4;
+const int IRQ_PIN =  3;
 
 PS2Keyboard keyboard;
 
 void setup() {
-  delay(1000);
-  keyboard.begin(DataPin, IRQpin);
   Serial.begin(9600);
-  Serial.println("Keyboard Test:");
+
+  pinMode(SAFETY, INPUT_PULLUP); // safety switch: ground to play
+
+  //start LED off
+  pinMode(LED, OUTPUT);
+  digitalWrite(LED, LOW);
+
+  keyboard.begin(DATA_PIN, IRQ_PIN); // PS2
+  Keyboard.begin(); // USB
+
+  delay(1000); // ready?
 }
 
 void loop() {
+  // safety switch: entered if pin is disconnected from ground, for fixing runaway bugs
+  while(digitalRead(SAFETY)) {
+    Keyboard.releaseAll();
+    Keyboard.end();
+    digitalWrite(LED, HIGH );
+    while(true){
+      // stop program here
+    }
+  }
+
   if (keyboard.available()) {
-    
+
     // read the next key
-    char c = keyboard.read();
-    
+    char c = keyboard.read(); // from PS2
+    //Serial.print(c, BIN);
+    //Serial.print(" dec: ");
+    //Serial.println(c, DEC);
+
     // check for some of the special keys
     if (c == PS2_ENTER) {
-      Serial.println();
-    } else if (c == PS2_TAB) {
-      Serial.print("[Tab]");
-    } else if (c == PS2_ESC) {
-      Serial.print("[ESC]");
-    } else if (c == PS2_PAGEDOWN) {
-      Serial.print("[PgDn]");
-    } else if (c == PS2_PAGEUP) {
-      Serial.print("[PgUp]");
-    } else if (c == PS2_LEFTARROW) {
-      Serial.print("[Left]");
-    } else if (c == PS2_RIGHTARROW) {
-      Serial.print("[Right]");
-    } else if (c == PS2_UPARROW) {
-      Serial.print("[Up]");
-    } else if (c == PS2_DOWNARROW) {
-      Serial.print("[Down]");
-    } else if (c == PS2_DELETE) {
-      Serial.print("[Del]");
-    } else {
-      
+      Keyboard.write(KEY_RETURN); // to USB
+    } 
+    else if (c == PS2_LEFTARROW) {
+      Keyboard.write(KEY_LEFT_ARROW); // to USB
+    } 
+    else if (c == PS2_RIGHTARROW) {
+      Keyboard.write(KEY_RIGHT_ARROW); // to USB
+    } 
+    else if (c == PS2_UPARROW) {
+      Keyboard.write(KEY_UP_ARROW); // to USB
+    } 
+    else if (c == PS2_DOWNARROW) {
+      Keyboard.write(KEY_DOWN_ARROW); // to USB
+    } 
+    else {
       // otherwise, just print all normal characters
-      Serial.print(c);
+      Keyboard.write(c); // to USB
     }
   }
 }
+
